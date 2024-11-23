@@ -1,0 +1,60 @@
+CREATE DATABASE [Nursery Plant Zone];
+USE [Nursery Plant Zone];
+
+CREATE TABLE Users (
+    user_id INT IDENTITY(1,1) PRIMARY KEY,
+    role VARCHAR(12) DEFAULT 'Customer',
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+	name VARCHAR(200) NOT NULL,
+    address TEXT NOT NULL,
+    contact_number VARCHAR(15),
+);
+
+CREATE TABLE Nurseries (
+    nursery_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT NOT NULL,
+    status VARCHAR(8) DEFAULT 'Pending',
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Plants (
+    plant_id INT IDENTITY(1,1) PRIMARY KEY,
+    nursery_id INT NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    price VARCHAR(MAX) NOT NULL,
+    stock INT DEFAULT 0,
+    image_url TEXT,
+    FOREIGN KEY (nursery_id) REFERENCES nurseries(nursery_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Orders (
+    order_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL,
+	plant_id INT NOT NULL,
+    quantity INT NOT NULL,
+    status VARCHAR(10) DEFAULT 'Pending',
+    created_at DATETIME,
+	FOREIGN KEY (plant_id) REFERENCES plants(plant_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Feedback (
+    feedback_id INT IDENTITY(1,1) PRIMARY KEY,
+    order_id INT,
+    comment TEXT NOT NULL,
+    created_at DATE,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);
+--- To do---
+CREATE TABLE DeliverySchedule (
+    schedule_id INT IDENTITY(1,1) PRIMARY KEY,
+    order_id INT NOT NULL,
+    delivery_boy_id INT NOT NULL,
+    scheduled_date DATE NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (delivery_boy_id) REFERENCES users(user_id)
+);
+

@@ -29,4 +29,4 @@ def get_user(db:Session,user_id:int):
         raise HTTPException(status_code=401, detail="User not found")
 
 def get_all_user(db:Session,skip:int=0,limit:int=20):
-    return db.query(UserModel).order_by(UserModel.user_id).offset(skip).limit(limit=limit).all()
+    return db.query(UserModel).filter(UserModel.role=="Customer").order_by(UserModel.user_id).offset(skip).limit(limit=limit).all()

@@ -12,4 +12,3 @@ class NurseryResponse(NurseryBase):
     nursery_id:int
     class config:
         from_attributes=True
-       

@@ -6,11 +6,11 @@ class UserBase(BaseModel):
     name: Annotated[str,StringConstraints(max_length=200)]
     address: str
     contact_number: Annotated[str,StringConstraints(max_length=15)]
-    is_nursery:bool = False
 
 
 class UserCreate(UserBase):
     password_hash: str
+    is_nursery:bool = False
 
     @field_validator('password_hash')
     def validate_password(cls, v):

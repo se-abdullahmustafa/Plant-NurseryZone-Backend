@@ -19,6 +19,11 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 #     db.commit()
 #     db.refresh(db_nursery)
 #     return db_nursery
+async def get_nursery_by_user_id(db:Session,user_id:int):
+    nursery=db.query(NurseryModel).filter(NurseryModel.user_id==user_id).first()
+    if not nursery:
+        raise HTTPException(status_code=404,detail="Nursery not found.")
+    return nursery
 async def get_nursery(db:Session,nursery_id:int):
     nursery= db.query(NurseryModel).filter(NurseryModel.nursery_id==nursery_id).filter(NurseryModel.status=="Accepted").first()
     if not nursery_id:
@@ -106,8 +111,9 @@ async def get_plant_by_id(db:Session,plant_id:int):
         raise HTTPException(status_code=404,detail="Plant not found")
     return plant
 
-async def get_all_plant(db:Session,skip:int=0,limit:int=20):
-    plants=db.query(PlantModel).order_by(PlantModel.plant_id).offset(skip).limit(limit).all()
+async def get_all_plant(db:Session,nursery_id:int,skip:int=0,limit:int=20):
+    nursery=await get_nursery_by_user_id(db,nursery_id)
+    plants=db.query(PlantModel).filter(PlantModel.nursery_id==nursery.nursery_id).order_by(PlantModel.plant_id).offset(skip).limit(limit).all()
     if not plants:
          raise  HTTPException(status_code=404,detail="No plant found.")
     return plants 
@@ -119,11 +125,11 @@ async def add_new_plant(db:Session,
               price:str,
               stock:Optional[int],
               image:str):
-    await get_nursery(db=db,nursery_id=nursery_id)
+    nursery=await get_nursery_by_user_id(db=db,nursery_id=nursery_id)
     await validate_image(image)
     image_url=await save_image(image)
     try:
-        new_plant=PlantModel(nursery_id=nursery_id,name=name,description=description,price=price,stock=stock,image_url=image_url)
+        new_plant=PlantModel(nursery_id=nursery.nursery_id,name=name,description=description,price=price,stock=stock,image_url=image_url)
         db.add(new_plant)
         db.commit()
         db.refresh(new_plant)

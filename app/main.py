@@ -2,9 +2,16 @@ from fastapi import FastAPI
 from pathlib import Path
 import uvicorn
 from app.routers import user_route,nursery_route,order_route
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Nursery Plant Zone",description="Online Plateform to sell plants.")
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[""],  
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"], 
+)
 
 app.include_router(router=user_route.router, prefix="/api", tags=["User"])
 app.include_router(router=nursery_route.router, prefix="/api", tags=["Nursery"])

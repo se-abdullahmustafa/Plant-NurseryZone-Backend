@@ -18,5 +18,5 @@ def get_user(user_id:int,db:Session=Depends(get_db)):
 def get_users(skip:int=0,limit:int=20,db:Session=Depends(get_db)):
     return get_all_user(db=db,skip=skip,limit=limit)
 @router.get("/login",response_model=UserResponse)
-def login(email:str,password:str,db:Session=Depends(get_db)):
-    return login_user(db=db,email=email,password=password)
+async def login(email:str,password:str,db:Session=Depends(get_db)):
+    return await login_user(db=db,email=email,password=password)

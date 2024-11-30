@@ -24,7 +24,7 @@ async def add_plant(nursery_id: int=Form(...),
     db:Session=Depends(get_db)):
     return await add_new_plant(db,nursery_id,name,description,price,stock,image)
 @router.get("/nursery/plants",response_model=List[PlantResponse])
-async def get_plants(nursery_id:int,skip:int=0,limit:int=20,db:Session=Depends(get_db)):
+async def get_plants(nursery_id:Optional[int]=None,skip:int=0,limit:int=20,db:Session=Depends(get_db)):
     return await get_all_plant(db,nursery_id,skip,limit)
 @router.get("/nursery/plant",response_model=PlantResponse)
 async def get_plant(plant_id:int,db:Session=Depends(get_db)):

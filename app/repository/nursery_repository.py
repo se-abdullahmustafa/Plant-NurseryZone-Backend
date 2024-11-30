@@ -111,9 +111,12 @@ async def get_plant_by_id(db:Session,plant_id:int):
         raise HTTPException(status_code=404,detail="Plant not found")
     return plant
 
-async def get_all_plant(db:Session,nursery_id:int,skip:int=0,limit:int=20):
-    nursery=await get_nursery_by_user_id(db,nursery_id)
-    plants=db.query(PlantModel).filter(PlantModel.nursery_id==nursery.nursery_id).order_by(PlantModel.plant_id).offset(skip).limit(limit).all()
+async def get_all_plant(db:Session,nursery_id:int=None,skip:int=0,limit:int=20):
+    if nursery_id is not None:
+        nursery=await get_nursery_by_user_id(db,nursery_id)
+        plants=db.query(PlantModel).filter(PlantModel.nursery_id==nursery.nursery_id).order_by(PlantModel.plant_id).offset(skip).limit(limit).all()
+    else:
+        plants=db.query(PlantModel).order_by(PlantModel.plant_id).offset(skip).limit(limit).all()
     if not plants:
          raise  HTTPException(status_code=404,detail="No plant found.")
     return plants 
@@ -125,7 +128,7 @@ async def add_new_plant(db:Session,
               price:str,
               stock:Optional[int],
               image:str):
-    nursery=await get_nursery_by_user_id(db=db,nursery_id=nursery_id)
+    nursery=await get_nursery_by_user_id(db=db,user_id=nursery_id)
     await validate_image(image)
     image_url=await save_image(image)
     try:

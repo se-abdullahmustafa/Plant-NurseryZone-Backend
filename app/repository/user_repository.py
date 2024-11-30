@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.User import User as UserModel
 from app.schemas.user import UserCreate
 from app.models.Nurseries import Nurseries as NurseryModel
+from app.repository.nursery_repository import get_nursery_by_user_id
 
 def create_user(db:Session,user:UserCreate):
     db_user=UserModel(email=user.email,password_hash=user.password_hash,name=user.name,address=user.address,contact_number=user.contact_number)
@@ -15,10 +16,14 @@ def create_user(db:Session,user:UserCreate):
         db.commit()
     db.refresh(db_user)
     return db_user
-def login_user(db:Session,email:str,password:str):
+async def login_user(db:Session,email:str,password:str):
     db_user=db.query(UserModel).filter(UserModel.email==email).filter(UserModel.password_hash==password).first()
     if db_user is None:
         raise HTTPException(status_code=404,detail="invalid credential")
+    if db_user.role == "Nursery":
+        nursery = await get_nursery_by_user_id(db=db,user_id=db_user.user_id)
+        if nursery.status!="Accepted":
+            raise HTTPException(status_code=403,detail="Permission denied")
     return db_user
         
 def get_user(db:Session,user_id:int):

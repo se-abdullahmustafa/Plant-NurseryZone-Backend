@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from app.models.Order import Order as OrderModel
 from sqlalchemy.orm import Session
 from app.schemas.order import OrderCreate
+from app.models.Order import OrderStatusService
 from app.models.Plant import Plant as PlantModel
 from app.models.User import User as UserModel
 from app.repository.nursery_repository import get_plant_by_id,decrease_stock
@@ -37,10 +38,12 @@ async def get_order_by_id(db:Session,order_id:int):
     user={"name":order_detail[2].name,"address":order_detail[2].address,"contact_number":order_detail[2].contact_number}    
     return {"order_id":order_detail[0].order_id,"Plant name":order_detail[1].name,"qunatity":order_detail[0].quantity,"Total Amount":order_detail[0].total_amount,"Status":order_detail[0].status,"Created_at":order_detail[0].created_at,"customer":user}
      
-async def order_status(order_id:int,status:str,db:Session):
+async def change_order_status(order_id:int,status:str,db:Session):
         order=db.query(OrderModel).filter(OrderModel.order_id==order_id).first()
         if not order:
             raise HTTPException(status_code=404,detail="Order not found")
+        if not OrderStatusService.validate_status_change(order.status, status):
+            raise HTTPException(status_code=400,detail=f"Invalid status transition from {order.status} to {status}")
         order.status=status
         try:
             db.commit()

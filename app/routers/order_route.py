@@ -18,5 +18,5 @@ async def get_orders(nursery_id:int,skip:int=0,limit:int=20,db:Session=Depends(g
 async def get_order_details(order_id:int,db:Session=Depends(get_db)):
     return await get_order_by_id(db,order_id)
 @router.put("/order/status",response_class=JSONResponse)
-async def change_order_status(order_id:int,status:str,db:Session=Depends(get_db)):
-    return await order_status(order_id,status,db)
+async def update_order_status(order_id:int,status:str,db:Session=Depends(get_db)):
+    return await change_order_status(order_id,status,db)

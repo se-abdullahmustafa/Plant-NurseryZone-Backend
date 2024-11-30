@@ -11,3 +11,27 @@ class Order(Base):
     status=Column(String(10),default="Pending")
     created_at=Column(DateTime)
     
+    
+class OrderStatusService:
+    VALID_STATUSES = [
+        "Pending", 
+        "Processing", 
+        "Shipped", 
+        "Delivered", 
+        "Cancelled"
+    ]
+
+    VALID_TRANSITIONS = {
+        "Pending": ["Processing", "Cancelled"],
+        "Processing": ["Shipped", "Cancelled"],
+        "Shipped": ["Delivered"],
+        "Delivered": [],
+        "Cancelled": []
+    }
+
+    @classmethod
+    def validate_status_change(cls, current_status: str, new_status: str) -> bool:
+        if new_status not in cls.VALID_STATUSES:
+            return False
+        return new_status in cls.VALID_TRANSITIONS.get(current_status, [])
+    

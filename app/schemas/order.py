@@ -3,7 +3,7 @@ from pydantic import BaseModel
 class OrderCreate(BaseModel):
     user_id:int
     plant_id:int
-    quntity:int
+    quantity:int
 class OrderResponse(BaseModel):
     user_id:int
     plant_id:int

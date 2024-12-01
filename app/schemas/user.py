@@ -17,6 +17,14 @@ class UserCreate(UserBase):
         if len(v) < 8:
             raise ValueError('Password must be at least 8 characters')
         return v
+class UserCreateForDeliveryBoy(UserBase):
+        password_hash: str
+        nursery_id:int
+        @field_validator('password_hash')
+        def validate_password(cls, v):
+            if len(v) < 8:
+                raise ValueError('Password must be at least 8 characters')
+            return v
 
 class UserResponse(UserBase):
     user_id: int

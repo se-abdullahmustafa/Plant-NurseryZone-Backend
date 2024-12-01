@@ -5,7 +5,7 @@ from app.schemas.order import OrderCreate
 from app.models.Order import OrderStatusService
 from app.models.Plant import Plant as PlantModel
 from app.models.User import User as UserModel
-from app.repository.nursery_repository import get_plant_by_id,decrease_stock
+from app.repository.nursery_repository import get_plant_by_id,decrease_stock,get_nursery_by_user_id
 from datetime import datetime
 
 async def add_order(db:Session,order:OrderCreate):
@@ -24,7 +24,15 @@ async def add_order(db:Session,order:OrderCreate):
         raise HTTPException(status_code=500,detail=str(e))    
     
 async def get_all_order(db:Session,nursery_id:int,skip:int=0,limit:int=20):
-    orders=db.query(OrderModel,PlantModel).join(PlantModel,OrderModel.plant_id==PlantModel.plant_id).filter(PlantModel.nursery_id==nursery_id).filter(OrderModel.status=="Pending").order_by(OrderModel.created_at).offset(skip).limit(limit).all()
+    nursery= await get_nursery_by_user_id(db,user_id=nursery_id)
+    orders=db.query(OrderModel,PlantModel).join(PlantModel,OrderModel.plant_id==PlantModel.plant_id).filter(PlantModel.nursery_id==nursery.nursery_id).filter(OrderModel.status=="Pending").order_by(OrderModel.created_at).offset(skip).limit(limit).all()
+    result=[]
+    await get_order_by_id(db,order_id=1)
+    for order,plant in orders:
+        result.append({"order_id":order.order_id,"Plant name":plant.name,"qunatity":order.quantity,"Total Amount":order.total_amount,"Status":order.status,"Created_at":order.created_at})
+    return result
+async def get_all_order_by_user_id(db:Session,user_id:int,skip:int=0,limit:int=20):
+    orders=db.query(OrderModel,PlantModel).join(PlantModel,OrderModel.plant_id==PlantModel.plant_id).filter(OrderModel.user_id==user_id).order_by(OrderModel.created_at).offset(skip).limit(limit).all()
     result=[]
     await get_order_by_id(db,order_id=1)
     for order,plant in orders:
@@ -37,7 +45,7 @@ async def get_order_by_id(db:Session,order_id:int):
         raise HTTPException(status_code=404,detail="Order Details not found.")
     user={"name":order_detail[2].name,"address":order_detail[2].address,"contact_number":order_detail[2].contact_number}    
     return {"order_id":order_detail[0].order_id,"Plant name":order_detail[1].name,"qunatity":order_detail[0].quantity,"Total Amount":order_detail[0].total_amount,"Status":order_detail[0].status,"Created_at":order_detail[0].created_at,"customer":user}
-     
+
 async def change_order_status(order_id:int,status:str,db:Session):
         order=db.query(OrderModel).filter(OrderModel.order_id==order_id).first()
         if not order:

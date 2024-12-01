@@ -13,7 +13,7 @@ def create_user(db:Session,user:UserCreate):
         db_nursery=NurseryModel(user_id=db_user.user_id)
         db_user.role="Nursery"
         db.add(db_nursery)
-        db.commit()
+        db.commit()    
     db.refresh(db_user)
     return db_user
 async def login_user(db:Session,email:str,password:str):

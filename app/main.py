@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="Nursery Plant Zone",description="Online Plateform to sell plants.")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[""],  
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],  
     allow_headers=["*"], 

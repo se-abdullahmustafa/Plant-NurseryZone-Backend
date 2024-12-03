@@ -10,14 +10,14 @@ from datetime import datetime
 
 async def add_order(db:Session,order:OrderCreate):
     plant= await get_plant_by_id(db,order.plant_id)
-    if plant.stock<order.quntity:
+    if plant.stock<order.quantity:
         raise HTTPException(status_code=500,detail="Insufficient Quantity")
-    new_order=OrderModel(user_id=order.user_id,plant_id=order.plant_id,quantity=order.quntity,total_amount=order.quntity*int(plant.price),created_at=datetime.now())
+    new_order=OrderModel(user_id=order.user_id,plant_id=order.plant_id,quantity=order.quantity,total_amount=order.quantity*int(plant.price),created_at=datetime.now())
     try:
         db.add(new_order)
         db.commit()
         db.refresh(new_order)
-        await decrease_stock(db,order.quntity,order.plant_id)
+        await decrease_stock(db,order.quantity,order.plant_id)
         return {"Order Placed Successfully"}
     except Exception as e:
         db.rollback()

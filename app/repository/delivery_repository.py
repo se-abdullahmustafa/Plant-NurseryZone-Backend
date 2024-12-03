@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app.models.User import User as UserModel
 from app.models.DeliveryBoy import DeliveryBoy as DeliverBoyModel
 from app.models.DeliverySchedule import DeliverySchedule as DsModel
+from app.models.Order import Order as OrderModel
 from app.schemas.user import UserCreateForDeliveryBoy
 from fastapi import HTTPException
 from datetime import datetime
@@ -10,11 +11,12 @@ from app.repository.nursery_repository import *
 async def post_delivery_boy(db:Session,user:UserCreateForDeliveryBoy):
     if user is None:
         raise HTTPException(status_code=400,detail="Bad Request")
+    nursery = await  get_nursery_by_user_id(db,user.nursery_id)
     db_user=UserModel(email=user.email,password_hash=user.password_hash,name=user.name,address=user.address,contact_number=user.contact_number,role="DeliveryBoy")
     try:
         db.add(db_user)
         db.commit()
-        db_deliver_boy=DeliverBoyModel(nursery_id=user.nursery_id,user_id=db_user.user_id)
+        db_deliver_boy=DeliverBoyModel(nursery_id=nursery.nursery_id,user_id=db_user.user_id)
         db.add(db_deliver_boy)
         db.commit()
         return {"message":"Delivery Boy Added Successfully."}
@@ -44,4 +46,18 @@ async def scheduled_delivery(db:Session,delivery_boy_id:int,order_id:int):
         db.refresh(dsModel)
         return {"message":"Delivery Scheduled Successfully"}
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500,detail=str(e))
+async def get_schedule_delivery(db:Session,user_id:int):
+    deliveries=db.query(DsModel,DeliverBoyModel,OrderModel,UserModel).join(DeliverBoyModel,DeliverBoyModel.delivery_boy_id==DsModel.delivery_boy_id)\
+        .join(OrderModel,DsModel.order_id==OrderModel.order_id).join(UserModel,OrderModel.user_id==UserModel.user_id)\
+        .filter(DeliverBoyModel.user_id==user_id).filter(OrderModel.status=="Shipped").all()
+    result=[]
+    for ds,db,order,user in deliveries:
+       result.append({"delivery_id":ds.schedule_id,"order_id":order.order_id,
+                      "name":user.name,"address":user.address,
+                      "contact_number":user.contact_number,
+                      "schedule_date":ds.scheduled_date,
+                      "status":order.status})
+    return result    
+    

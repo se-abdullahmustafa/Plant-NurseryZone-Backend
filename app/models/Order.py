@@ -24,7 +24,7 @@ class OrderStatusService:
     VALID_TRANSITIONS = {
         "Pending": ["Processing", "Cancelled"],
         "Processing": ["Shipped", "Cancelled"],
-        "Shipped": ["Delivered"],
+        "Shipped": ["Delivered","Cancelled"],
         "Delivered": [],
         "Cancelled": []
     }

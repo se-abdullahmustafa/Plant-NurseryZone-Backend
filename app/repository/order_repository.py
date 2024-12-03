@@ -25,7 +25,7 @@ async def add_order(db:Session,order:OrderCreate):
     
 async def get_all_order(db:Session,nursery_id:int,skip:int=0,limit:int=20):
     nursery= await get_nursery_by_user_id(db,user_id=nursery_id)
-    orders=db.query(OrderModel,PlantModel).join(PlantModel,OrderModel.plant_id==PlantModel.plant_id).filter(PlantModel.nursery_id==nursery.nursery_id).filter(OrderModel.status=="Pending").order_by(OrderModel.created_at).offset(skip).limit(limit).all()
+    orders=db.query(OrderModel,PlantModel).join(PlantModel,OrderModel.plant_id==PlantModel.plant_id).filter(PlantModel.nursery_id==nursery.nursery_id).filter(OrderModel.status!="Delivered").order_by(OrderModel.created_at).offset(skip).limit(limit).all()
     result=[]
     await get_order_by_id(db,order_id=1)
     for order,plant in orders:

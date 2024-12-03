@@ -15,3 +15,6 @@ async def get_delivery_boys(nursery_id:int,db:Session=Depends(get_db)):
 @router.post("/delivery/schedule",response_class=JSONResponse)
 async def schedule_delivery(delivery_boy_id:int,order_id:int,db:Session=Depends(get_db)):
     return await scheduled_delivery(db,delivery_boy_id,order_id)  
+@router.get("/delivery/schedule",response_class=JSONResponse)
+async def get_sheduled_delivery(user_id:int,db:Session=Depends(get_db)):
+    return await get_schedule_delivery(db,user_id)

@@ -22,4 +22,4 @@ app.include_router(router=delivery_route.router,prefix="/api",tags=["DeliveryBoy
 
 app.mount("/api/static/plant_images", StaticFiles(directory="static/plant_images"), name="plant_images")
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="0.0.0.0")

@@ -25,11 +25,12 @@ async def add_order(db:Session,order:OrderCreate):
     
 async def get_all_order(db:Session,nursery_id:int,skip:int=0,limit:int=20):
     nursery= await get_nursery_by_user_id(db,user_id=nursery_id)
-    orders=db.query(OrderModel,PlantModel).join(PlantModel,OrderModel.plant_id==PlantModel.plant_id).filter(PlantModel.nursery_id==nursery.nursery_id).filter(OrderModel.status!="Delivered").order_by(OrderModel.created_at).offset(skip).limit(limit).all()
+    orders=db.query(OrderModel,PlantModel,UserModel).join(PlantModel,OrderModel.plant_id==PlantModel.plant_id).join(UserModel,OrderModel.user_id==UserModel.user_id).filter(PlantModel.nursery_id==nursery.nursery_id).filter(OrderModel.status!="Delivered").order_by(OrderModel.created_at).offset(skip).limit(limit).all()
     result=[]
     await get_order_by_id(db,order_id=1)
-    for order,plant in orders:
-        result.append({"order_id":order.order_id,"Plant name":plant.name,"qunatity":order.quantity,"Total Amount":order.total_amount,"Status":order.status,"Created_at":order.created_at})
+    print(orders)
+    for order,plant,user in orders:
+        result.append({"order_id":order.order_id,"user_name":user.name,"user_address":user.address,"user_contact_no":user.contact_number,"Plant name":plant.name,"qunatity":order.quantity,"Total Amount":order.total_amount,"Status":order.status,"Created_at":order.created_at})
     return result
 async def get_all_order_by_user_id(db:Session,user_id:int,skip:int=0,limit:int=20):
     orders=db.query(OrderModel,PlantModel).join(PlantModel,OrderModel.plant_id==PlantModel.plant_id).filter(OrderModel.user_id==user_id).order_by(OrderModel.created_at).offset(skip).limit(limit).all()
